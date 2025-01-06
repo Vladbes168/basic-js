@@ -19,23 +19,42 @@ function transform(arr) {
   }
 
   const result = [];
+  let skipNext = false;
+
   for (let i = 0; i < arr.length; i++) {
     const current = arr[i];
 
-    if (current === "--double-next") {
-      if (i < arr.length - 1) {
-        result.push(arr[i + 1]);
-      }
-    } else if (current === "--discard-prev") {
-      if (result.length > 0) {
-        result.pop();
-      }
-    } else if (current === "--double-prev") {
-      if (result.length > 0) {
-        result.push(result[result.length - 1]);
-      }
-    } else {
-      result.push(current);
+    if (skipNext) {
+      skipNext = false;
+      continue;
+    }
+
+    switch (current) {
+      case "--discard-next":
+        skipNext = true;
+        break;
+
+      case "--discard-prev":
+        if (result.length > 0 && arr[i - 2] !== "--discard-next") {
+          result.pop();
+        }
+        break;
+
+      case "--double-next":
+        if (i < arr.length - 1) {
+          result.push(arr[i + 1]);
+        }
+        break;
+
+      case "--double-prev":
+        if (i > 0 && arr[i - 2] !== "--discard-next") {
+          result.push(arr[i - 1]);
+        }
+        break;
+
+      default:
+        result.push(current);
+        break;
     }
   }
 
